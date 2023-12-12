@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+
+# Dependency directories
+npm-debug.log
+yarn-error.log
+pnpify/
+
+# Optional: Logs
+logs
+*.log
+
+# Optional: Debugging / VSCode directories
+.vscode/
+node_modules/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+# Optional: Operating System Files
+.DS_Store
+Thumbs.db
