@@ -1,23 +1,25 @@
 // controllers/userController.js
 const User = require("../models/user");
-const companyModal = require("../models/company");
+const companyModal = require("../models/category");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 exports.registerUser = async (req, res) => {
   try {
-    const { username, email, role, password } = req.body;
+    const { username, email, phoneNumber, role, password } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }, { phoneNumber }],
+    });
     if (existingUser) {
       return res
         .status(400)
-        .json({ error: "Username or email is already in use" });
+        .json({ error: "Username or email or phoneNumber is already exists" });
     }
 
-    const newUser = new User({ username, email, role, password });
+    const newUser = new User({ username, email, role, phoneNumber, password });
     await newUser.save();
-    res.json({ message: "User registered successfully" });
+    res.json({ status: "success", message: "User registered successfully" });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ error: "Internal Server Error" });

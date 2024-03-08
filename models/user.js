@@ -1,5 +1,5 @@
 // models/user.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -12,13 +12,18 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  role: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: { type: Number, unique: true, required: true },
   password: {
     type: String,
     required: true,
   },
-  data: [{ type: mongoose.Schema.Types.ObjectId, ref: 'company' }],
+  data: [{ type: mongoose.Schema.Types.ObjectId, ref: "company" }],
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
