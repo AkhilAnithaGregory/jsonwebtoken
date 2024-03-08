@@ -33,7 +33,8 @@ exports.createCart = async (req, res) => {
       products: [
         {
           product: productId,
-          quantity: 1,
+          quantity: 1, 
+        },
       ],
     });
 
