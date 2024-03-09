@@ -7,7 +7,6 @@ exports.createCart = async (req, res) => {
     const userId = "65eb09f10bde3d2b05236579";
     const { productId } = req.body;
 
-    // Check if the product exists
     const product = await Product.findById(productId);
     if (!product) {
       return res
@@ -15,10 +14,7 @@ exports.createCart = async (req, res) => {
         .json({ status: "failed", error: "Product not found" });
     }
 
-    // Check if the user already has a cart
     const existingCart = await Cart.findOne({ user: userId });
-
-    // Check if the same product is already in the cart
     if (
       existingCart &&
       existingCart.products.some((item) => item.product.equals(productId))

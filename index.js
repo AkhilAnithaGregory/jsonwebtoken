@@ -1,4 +1,3 @@
-// index.js
 const express = require("express");
 const connectDB = require("./mongodb");
 const bodyParser = require("body-parser");
@@ -20,8 +19,6 @@ app.post("/", (req, res) => {
     Header2: ["Value2", "Value3"],
     Header3: "Value4",
   });
-
-  // Send a response
   res.send("Hello, World!");
 });
 

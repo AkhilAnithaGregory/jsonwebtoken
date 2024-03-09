@@ -1,7 +1,6 @@
 const Product = require("../models/product");
 const Wishlist = require("../models/wishList");
 
-// Create a new product
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -61,7 +60,6 @@ exports.getAllProducts = async (req, res) => {
       ? userWishlist.products.map((product) => product._id.toString())
       : [];
 
-    // Find all products and add a new field 'isInWishlist' indicating whether the user has the product in their wishlist
     const products = await Product.find().populate(
       "createdBy modifiedBy category reviews.user"
     );
@@ -82,7 +80,6 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// Get a product by ID
 exports.getProductById = async (req, res) => {
   try {
     const productId = req.params.productId;
@@ -102,7 +99,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// Update a product
 exports.updateProduct = async (req, res) => {
   try {
     const productId = req.params.productId;
@@ -118,7 +114,6 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    // Update the product
     existingProduct.name = name || existingProduct.name;
     existingProduct.description = description || existingProduct.description;
     existingProduct.salePrice = salePrice || existingProduct.salePrice;
@@ -126,7 +121,7 @@ exports.updateProduct = async (req, res) => {
     existingProduct.images = images || existingProduct.images;
     existingProduct.reviews = reviews || existingProduct.reviews;
     existingProduct.modifiedOn = new Date();
-    existingProduct.modifiedBy = "admin"; // You can replace this with the actual modifier
+    existingProduct.modifiedBy = "admin";
 
     await existingProduct.save();
 
@@ -141,12 +136,9 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// Delete a product
 exports.deleteProduct = async (req, res) => {
   try {
     const productId = req.params.productId;
-
-    // Check if the product exists
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) {
       return res.status(404).json({
@@ -154,8 +146,6 @@ exports.deleteProduct = async (req, res) => {
         error: "Product not found",
       });
     }
-
-    // Delete the product
     await existingProduct.remove();
 
     res.status(200).json({
