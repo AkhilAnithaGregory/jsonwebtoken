@@ -105,7 +105,6 @@ exports.updateProduct = async (req, res) => {
     const { name, description, salePrice, category, images, reviews } =
       req.body;
 
-    // Check if the product exists
     const existingProduct = await Product.findById(productId);
     if (!existingProduct) {
       return res.status(404).json({
@@ -154,6 +153,114 @@ exports.deleteProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.addReview = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const { rating, comment } = req.body;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Product not found",
+      });
+    }
+
+    const newReview = {
+      user: req.user._id,
+      rating,
+      comment,
+      createdOn: new Date(),
+      modifiedOn: new Date(),
+    };
+
+    product.reviews.push(newReview);
+    await product.save();
+
+    res.status(201).json({
+      status: "success",
+      message: "Review added successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.updateReview = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const reviewId = req.params.reviewId;
+    const { rating, comment } = req.body;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Product not found",
+      });
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review || review.user.toString() !== req.user._id.toString()) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Review not found or you are not authorized to update this review",
+      });
+    }
+
+    review.rating = rating || review.rating;
+    review.comment = comment || review.comment;
+    review.modifiedOn = new Date();
+
+    await product.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Review updated successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.error("Error updating review:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.deleteReview = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const reviewId = req.params.reviewId;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Product not found",
+      });
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review || review.user.toString() !== req.user._id.toString()) {
+      return res.status(404).json({
+        status: "failed",
+        error: "Review not found or you are not authorized to delete this review",
+      });
+    }
+
+    review.remove();
+    await product.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Review deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting review:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

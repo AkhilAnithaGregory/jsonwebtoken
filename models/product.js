@@ -1,28 +1,26 @@
 const mongoose = require("mongoose");
 
+const reviewSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, required: true },
+  createdOn: { type: Date, default: Date.now },
+  modifiedOn: { type: Date },
+});
+
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   salePrice: { type: Number, required: true },
-  discountPrice: { type: Number, required: true },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: true,
-  },
-  images: [{ type: String }],
-  reviews: [
-    {
-      user: { type: String },
-      text: { type: String },
-      rating: { type: Number, min: 1, max: 5 },
-    },
-  ],
-  createdOn: { type: Date, required: true },
-  createdBy: { type: String, required: true },
-  modifiedOn: { type: Date, required: true },
-  modifiedBy: { type: String, required: true },
-  isActive: { type: Boolean },
+  discountPrice: { type: Number },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+  images: [String],
+  reviews: [reviewSchema],
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  createdOn: { type: Date, default: Date.now },
+  modifiedOn: { type: Date },
+  isActive: { type: Boolean, default: true },
 });
 
 const Product = mongoose.model("Product", productSchema);
