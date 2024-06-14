@@ -8,8 +8,8 @@ router.post("/create", productController.createProduct);
 router.put("/update", productController.updateProduct);
 router.delete("/delete", productController.deleteProduct);
 
-router.post("/:productId/reviews", authenticate, productController.addReview);
-router.put("/:productId/reviews/:reviewId",authenticate,productController.updateReview);
-router.delete("/:productId/reviews/:reviewId",authenticate,productController.deleteReview);
+router.post("/:productId/reviews", productController.addReview);
+router.put("/:productId/reviews/:reviewId", productController.updateReview);
+router.delete("/:productId/reviews/:reviewId", productController.deleteReview);
 
 module.exports = router;
