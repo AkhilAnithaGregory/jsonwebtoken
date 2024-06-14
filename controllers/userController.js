@@ -11,12 +11,17 @@ exports.registerUser = async (req, res) => {
       $or: [{ username }, { email }, { phoneNumber }],
     });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "Username or email or phoneNumber is already exists" });
+      return res.status(400).json({ error: "User is already exists" });
     }
 
-    const newUser = new User({ username, email, role, phoneNumber, password, gender });
+    const newUser = new User({
+      username,
+      email,
+      role,
+      phoneNumber,
+      password,
+      gender,
+    });
     await newUser.save();
     res.json({ status: "success", message: "User registered successfully" });
   } catch (error) {
@@ -27,18 +32,18 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      return res.status(401).json({ error: "Invalid username or password" });
+    // const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (password !== user.password) {
+      return res.status(401).json({ error: "Invalid email or password" });
     }
-
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -73,13 +78,14 @@ exports.companyRegister = async (req, res) => {
   }
 };
 
-
 exports.getUserProfile = async (req, res) => {
   try {
-    const userId = req.user._id; 
+    const userId = req.user._id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
     res.status(200).json({ status: "success", user });
   } catch (error) {
@@ -93,12 +99,21 @@ exports.updateUserProfile = async (req, res) => {
     const userId = req.user._id;
     const updates = req.body;
 
-    const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true });
+    const user = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+      runValidators: true,
+    });
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
 
-    res.status(200).json({ status: "success", message: "User profile updated successfully", user });
+    res.status(200).json({
+      status: "success",
+      message: "User profile updated successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error updating user profile:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -118,21 +133,45 @@ exports.listUsers = async (req, res) => {
 exports.addShippingAddress = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { name, mobileNumber, apartmentName, streetName, landmark, pincode, city, default: isDefault } = req.body;
+    const {
+      name,
+      mobileNumber,
+      apartmentName,
+      streetName,
+      landmark,
+      pincode,
+      city,
+      default: isDefault,
+    } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
 
     if (isDefault) {
-      user.shippingAddresses.forEach(address => address.default = false);
+      user.shippingAddresses.forEach((address) => (address.default = false));
     }
 
-    user.shippingAddresses.push({ name, mobileNumber, apartmentName, streetName, landmark, pincode, city, default: isDefault });
+    user.shippingAddresses.push({
+      name,
+      mobileNumber,
+      apartmentName,
+      streetName,
+      landmark,
+      pincode,
+      city,
+      default: isDefault,
+    });
     await user.save();
 
-    res.status(201).json({ status: "success", message: "Shipping address added successfully", user });
+    res.status(201).json({
+      status: "success",
+      message: "Shipping address added successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error adding shipping address:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -145,10 +184,14 @@ exports.getShippingAddresses = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
 
-    res.status(200).json({ status: "success", shippingAddresses: user.shippingAddresses });
+    res
+      .status(200)
+      .json({ status: "success", shippingAddresses: user.shippingAddresses });
   } catch (error) {
     console.error("Error fetching shipping addresses:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -159,26 +202,52 @@ exports.updateShippingAddress = async (req, res) => {
   try {
     const userId = req.user._id;
     const addressId = req.params.addressId;
-    const { name, mobileNumber, apartmentName, streetName, landmark, pincode, city, default: isDefault } = req.body;
+    const {
+      name,
+      mobileNumber,
+      apartmentName,
+      streetName,
+      landmark,
+      pincode,
+      city,
+      default: isDefault,
+    } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
 
     const address = user.shippingAddresses.id(addressId);
     if (!address) {
-      return res.status(404).json({ status: "failed", error: "Address not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "Address not found" });
     }
 
     if (isDefault) {
-      user.shippingAddresses.forEach(addr => addr.default = false);
+      user.shippingAddresses.forEach((addr) => (addr.default = false));
     }
 
-    Object.assign(address, { name, mobileNumber, apartmentName, streetName, landmark, pincode, city, default: isDefault });
+    Object.assign(address, {
+      name,
+      mobileNumber,
+      apartmentName,
+      streetName,
+      landmark,
+      pincode,
+      city,
+      default: isDefault,
+    });
     await user.save();
 
-    res.status(200).json({ status: "success", message: "Shipping address updated successfully", user });
+    res.status(200).json({
+      status: "success",
+      message: "Shipping address updated successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error updating shipping address:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -192,18 +261,26 @@ exports.deleteShippingAddress = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ status: "failed", error: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "User not found" });
     }
 
     const address = user.shippingAddresses.id(addressId);
     if (!address) {
-      return res.status(404).json({ status: "failed", error: "Address not found" });
+      return res
+        .status(404)
+        .json({ status: "failed", error: "Address not found" });
     }
 
     address.remove();
     await user.save();
 
-    res.status(200).json({ status: "success", message: "Shipping address deleted successfully", user });
+    res.status(200).json({
+      status: "success",
+      message: "Shipping address deleted successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error deleting shipping address:", error);
     res.status(500).json({ error: "Internal Server Error" });

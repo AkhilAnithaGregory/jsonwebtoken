@@ -5,10 +5,7 @@ const connectDB = async () => {
     const mongoURI =
       "mongodb+srv://akhil_gregory:GZr1fQji9kKMjPB1@cluster0.04qsqmr.mongodb.net/ECCOMERCE";
 
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURI);
   } catch (error) {
     console.error("MongoDB connection failed:", error);
     process.exit(1);

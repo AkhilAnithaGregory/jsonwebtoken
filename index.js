@@ -1,5 +1,6 @@
 const express = require("express");
 const connectDB = require("./mongodb");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoute");
@@ -10,6 +11,9 @@ const StockRoutes = require("./routes/stockRoutes");
 
 const app = express();
 const port = 3001;
+
+app.use(cors());
+require("dotenv").config();
 
 connectDB();
 app.use(bodyParser.json());
