@@ -10,7 +10,7 @@ const CartRoutes = require("./routes/cartRoutes");
 const StockRoutes = require("./routes/stockRoutes");
 
 const app = express();
-const port = 3001;
+const port = 3002;
 
 app.use(cors());
 require("dotenv").config();
@@ -26,7 +26,7 @@ app.post("/", (req, res) => {
   });
   res.send("Hello, World!");
 });
-
+app.use('/uploads', express.static('uploads'));
 app.use("/v1/api/users", userRoutes);
 app.use("/v1/api/catgory", categoryRoutes);
 app.use("/v1/api/product", productRoutes);

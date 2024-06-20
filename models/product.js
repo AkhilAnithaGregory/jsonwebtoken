@@ -13,15 +13,33 @@ const productSchema = new mongoose.Schema({
   description: { type: String },
   salePrice: { type: Number, required: true },
   discountPrice: { type: Number },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
+  },
   images: [String],
+  sizes: [String],
+  colors: [String],
+  brandName: { type: String },
   reviews: [reviewSchema],
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdOn: { type: Date, default: Date.now },
   modifiedOn: { type: Date },
   isActive: { type: Boolean, default: true },
 });
+
+productSchema.virtual("categoryName").get(function () {
+  return this.category.name;
+});
+
+productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toObject", { virtuals: true });
 
 const Product = mongoose.model("Product", productSchema);
 
