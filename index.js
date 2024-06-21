@@ -8,6 +8,7 @@ const productRoutes = require("./routes/productRoute");
 const wishListRoutes = require("./routes/wishListRoute");
 const CartRoutes = require("./routes/cartRoutes");
 const StockRoutes = require("./routes/stockRoutes");
+const cloudinary = require("cloudinary").v2;
 
 const app = express();
 const port = 3002;
@@ -17,6 +18,12 @@ require("dotenv").config();
 
 connectDB();
 app.use(bodyParser.json());
+
+cloudinary.config({
+  cloud_name: "ddd6tq3qi",
+  api_key: "228189726195228",
+  api_secret: "KAxANxKnFDYSKdaWqwTBBpf5UaI",
+});
 
 app.post("/", (req, res) => {
   res.set({

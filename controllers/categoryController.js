@@ -1,38 +1,57 @@
 const Category = require("../models/category");
+const cloudinary = require("cloudinary").v2;
+const upload = require("../utilities/multerSetup");
 
-exports.createCategory = async (req, res) => {
-  try {
-    const { name, description, image, createdBy, modifiedBy } = req.body;
-    const existingCategory = await Category.findOne({ name });
-    if (existingCategory) {
-      return res
-        .status(400)
-        .json({ status: "failed", error: "Category already exists" });
+exports.createCategory = [
+  upload.array("images", 1),
+  async (req, res) => {
+    try {
+      const { name, description, createdBy, modifiedBy } = req.body;
+
+      const existingCategory = await Category.findOne({ name });
+      if (existingCategory) {
+        return res.status(400).json({
+          status: "failed",
+          error: "Category already exists",
+        });
+      }
+      const imageUploadPromises = req.files.map(
+        (file) =>
+          new Promise((resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream({ folder: "Images" }, (error, result) => {
+                if (error) return reject(error);
+                resolve(result.secure_url);
+              })
+              .end(file.buffer);
+          })
+      );
+
+      const imagePaths = await Promise.all(imageUploadPromises);
+      const newCategory = new Category({
+        name,
+        description,
+        image: imagePaths[0],
+        createdOn: new Date(),
+        createdBy,
+        modifiedOn: new Date(),
+        modifiedBy,
+        isActive: true,
+      });
+
+      await newCategory.save();
+
+      res.status(201).json({
+        status: "success",
+        message: "Category registered successfully",
+        data: newCategory,
+      });
+    } catch (error) {
+      console.error("Error registering Category:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
-    const newCategory = new Category({
-      name,
-      description,
-      image,
-      createdOn: new Date(),
-      createdBy,
-      modifiedOn: new Date(),
-      modifiedBy,
-      isActive: true,
-    });
-
-    await newCategory.save();
-
-    res.status(201).json({
-      status: "success",
-      message: "Category registered successfully",
-      data: newCategory,
-    });
-  } catch (error) {
-    console.error("Error registering Category:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+  },
+];
 
 exports.updateCategory = async (req, res) => {
   try {

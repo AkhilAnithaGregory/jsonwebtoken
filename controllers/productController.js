@@ -1,75 +1,54 @@
 const Product = require("../models/product");
 const Wishlist = require("../models/wishList");
-const multer = require("multer");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Directory to save the files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Generate unique filename
-  },
-});
-const upload = multer({ storage });
+exports.createProduct = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      salePrice,
+      discountPrice,
+      category,
+      images,
+      reviews,
+      createdBy,
+      modifiedBy,
+    } = req.body;
 
-// Create Product Function
-exports.createProduct = [
-  upload.array("images", 5), // Maximum 5 images
-  async (req, res) => {
-    try {
-      const {
-        name,
-        description,
-        salePrice,
-        discountPrice,
-        category,
-        sizes,
-        colors,
-        brandName,
-        createdBy,
-        modifiedBy,
-      } = req.body;
-
-      if (!name || !salePrice || !category || !createdBy) {
-        return res.status(400).json({
-          status: "failed",
-          error: "Name, salePrice, category, and createdBy are required fields",
-        });
-      }
-
-      // Process image files
-      const imagePaths = req.files.map((file) => file.path);
-
-      const newProduct = new Product({
-        name,
-        description,
-        salePrice,
-        discountPrice,
-        category,
-        images: imagePaths,
-        sizes: sizes ? sizes.split(",") : [], // Convert string to array
-        colors: colors ? colors.split(",") : [], // Convert string to array
-        brandName,
-        createdOn: new Date(),
-        createdBy,
-        modifiedOn: new Date(),
-        modifiedBy,
-        isActive: true,
+    if (!name || !salePrice || !category || !createdBy) {
+      return res.status(400).json({
+        status: "failed",
+        error: "Name, salePrice, category, and createdBy are required fields",
       });
-
-      await newProduct.save();
-
-      res.status(201).json({
-        status: "success",
-        message: "Product created successfully",
-        data: newProduct,
-      });
-    } catch (error) {
-      console.error("Error creating product:", error);
-      res.status(500).json({ error: "Internal Server Error" });
     }
-  },
-];
+
+    const newProduct = new Product({
+      name,
+      description,
+      salePrice,
+      discountPrice,
+      category,
+      images,
+      reviews,
+      createdOn: new Date(),
+      createdBy,
+      modifiedOn: new Date(),
+      modifiedBy,
+      isActive: true,
+    });
+
+    await newProduct.save();
+
+    res.status(201).json({
+      status: "success",
+      message: "Product created successfully",
+      data: newProduct,
+    });
+  } catch (error) {
+    console.error("Error creating product:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 exports.getAllProducts = async (req, res) => {
   try {
